@@ -1,40 +1,48 @@
 #!/usr/bin/python3
 """This module reads stdin line by line and computes metrics"""
 
-import sys
+from sys import stdin
 
-total_size = 0
-status_code_counts = {}
+file_size = 0
+status_codes = {"200": 0, "301": 0, "400": 0, "401": 0, "403": 0, "404": 0,
+                "405": 0, "500": 0}
+status_code = 0
 line_count = 0
 
+
+def stats(file_size, status_codes):
+    """
+    Prints the statistics from the beginning and after every 10 lines
+    and/or a keyboard interrupt
+    """
+    print("File size: " + str(file_size))
+    for code in sorted(status_codes.keys()):
+        if status_codes[code] > 0:
+            print(code + ": " + str(status_codes[code]))
+
+
 try:
-    for line in sys.stdin:
-        try:
-            parts = line.split()
-            file_size = int(parts[-1])
-            status_code = int(parts[-2])
-            print("File size:", file_size)
-            print(f"{status_code}")
-        except ValueError:
-            pass
+    for line in stdin:
+        line_count += 1
+        split_line = line.split()
 
-        if len(parts) >= 7 and parts[2] == '-[':
-            print(parts)
-            try:
-                total_size += file_size
-                status_code_counts[status_code] = status_code_counts.get(
-                        status_code, 0) + 1
-            except ValueError:
-                pass
+        if len(split_line) > 1:
+            file_size += int(split_line[-1])
 
-            if line_count % 10 == 0 or line_count == 1:
-                print("File size:", total_size)
-                for code in sorted(status_code_counts):
-                    print(f"{code}: {status_code_counts[code]}")
-                    print()
-                    line_count = 0
+        if len(split_line) > 2 and split_line[-2].isdigit():
+            status_code = split_line[-2]
+        else:
+            status_code = 0
+
+        if status_code in status_codes.keys():
+            status_codes[status_code] += 1
+
+        if line_count % 10 == 0:
+            stats(file_size, status_codes)
+
+        stats(file_size, status_codes)
+
 
 except KeyboardInterrupt:
-    print("File size:", total_size)
-    for code in sorted(status_code_counts):
-        print(f"{code}: {status_code_counts[code]}")
+    stats(file_size, status_codes)
+    raise
