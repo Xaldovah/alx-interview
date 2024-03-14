@@ -16,50 +16,21 @@ def isWinner(x, nums):
             str or None: The name of the player that won the most rounds.
             If the winner cannot be determined, returns None.
     """
-
-    def sieve_of_eratosthenes(n):
-        """
-        Generates all prime numbers up to a given number using the Sieve of
-        Eratosthenes algorithm.
-
-        Args:
-            n (int): The upper limit for generating prime numbers.
-
-        Returns:
-            list: A list of prime numbers up to and including n.
-        """
-        primes = [True] * (n + 1)
-        primes[0] = primes[1] = False
-        p = 2
-        while p * p <= n:
-            if primes[p]:
-                for i in range(p * p, n + 1, p):
-                    primes[i] = False
-            p += 1
-        return [i for i in range(n + 1) if primes[i]]
-
-    def canWin(n):
-        """
-        Determines the winner of the Prime Game for a specific round.
-
-        Args:
-            n (int): The upper limit of the range for the round.
-
-        Returns:
-            str: The name of the player who wins the round.
-        """
-        primes = sieve_of_eratosthenes(n)
-        if len(primes) % 2 == 1:
-            return "Maria"
-        else:
-            return "Ben"
-
-    winners = [canWin(n) for n in nums]
-    maria_wins = winners.count("Maria")
-    ben_wins = winners.count("Ben")
-    if maria_wins > ben_wins:
-        return "Maria"
-    elif maria_wins < ben_wins:
-        return "Ben"
-    else:
+    if x < 1 or not nums:
         return None
+    marias_wins, bens_wins = 0, 0
+    n = max(nums)
+    primes = [True for _ in range(1, n + 1, 1)]
+    primes[0] = False
+    for i, is_prime in enumerate(primes, 1):
+        if i == 1 or not is_prime:
+            continue
+        for j in range(i + i, n + 1, i):
+            primes[j - 1] = False
+    for _, n in zip(range(x), nums):
+        primes_count = len(list(filter(lambda x: x, primes[0: n])))
+        bens_wins += primes_count % 2 == 0
+        marias_wins += primes_count % 2 == 1
+    if marias_wins == bens_wins:
+        return None
+    return 'Maria' if marias_wins > bens_wins else 'Ben'
