@@ -17,7 +17,7 @@ def isWinner(x, nums):
             If the winner cannot be determined, returns None.
     """
 
-    def sieve(n):
+    def sieve_of_eratosthenes(n):
         """
         Generates all prime numbers up to a given number using the Sieve of
         Eratosthenes algorithm.
@@ -28,15 +28,15 @@ def isWinner(x, nums):
         Returns:
             list: A list of prime numbers up to and including n.
         """
-        primes = []
-        is_prime = [True] * (n + 1)
-        is_prime[0] = is_prime[1] = False
-        for p in range(2, n + 1):
-            if is_prime[p]:
-                primes.append(p)
+        primes = [True] * (n + 1)
+        primes[0] = primes[1] = False
+        p = 2
+        while p * p <= n:
+            if primes[p]:
                 for i in range(p * p, n + 1, p):
-                    is_prime[i] = False
-        return primes
+                    primes[i] = False
+            p += 1
+        return [i for i in range(n + 1) if primes[i]]
 
     def canWin(n):
         """
@@ -48,7 +48,7 @@ def isWinner(x, nums):
         Returns:
             str: The name of the player who wins the round.
         """
-        primes = sieve(n)
+        primes = sieve_of_eratosthenes(n)
         if len(primes) % 2 == 1:
             return "Maria"
         else:
